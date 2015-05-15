@@ -1,6 +1,8 @@
 package com.test;
+import java.nio.file.Watchable;
 import java.util.Random;
 import com.test.animals.Cat;
+import com.test.web.AttackResult;
 import com.test.web.WebApp;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -9,7 +11,7 @@ import java.io.IOException;
 import java.util.Random;
 
 /**
- * Created by alekseydudchenko on 06/05/15.
+ * Created by leva on 06/05/15.
  */
 public class Hello {
     public static final String ANSI_RESET = "\u001B[0m";
@@ -22,25 +24,74 @@ public class Hello {
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_WHITE = "\u001B[37m";
 
+    public static final String[] REWARD_PHRASES = new String[] {
+            "You are my Hero!!!",
+            "I know it would be you.",
+            "You are my brave boy!",
+            "You killed a Monster!",
+            "You wanna go to my place?",
+            "Let me hill your wounds.",
+            "I preyed for you, my brave boy.",
+            "I knew you're the best!"
+    };
+
+    static Random random = new Random(System.currentTimeMillis());
+
     public static void main(String[] args) throws IOException {
 
         Hero serejka = new Hero("Serejka", 1300, 400);
         Hero bulya = new Hero("Bulya", 1500, 600);
+        serejka.setAnsiColor(ANSI_YELLOW);
+        bulya.setAnsiColor(ANSI_PURPLE);
 
-        Weapon serejkaSword = new Weapon();
-        Weapon bulyaSword = new Weapon();
-        serejkaSword.setPhysicalDamage(100);
-        bulyaSword.setPhysicalDamage(80);
+
+        Armor simplArmor = new Armor("T-shirt", 1);
+        Armor simplArmor1 = new Armor("Sweater", 2);
+        Armor simplArmor2 = new Armor("Tylyp", 6);
+        Armor simplArmor3 = new Armor("Setocka Leontieva", 1);
+
+        Weapon hand = new Weapon("Hand", 5, 10, 1, false, 2, Integer.MAX_VALUE);
+        Weapon simpleSword = new Weapon("Simple Sword", 40, 50, 1.8, true, 4, 150);
+        Weapon greatSword = new Weapon("Great Sword", 80, 90, 1.4, true, 3, 170);
+        Weapon twoHandSword = new Weapon("Two Hand Sword", 90, 110, 2.1, false, Integer.MAX_VALUE, 110);
+        Weapon bow = new Weapon("Bow", 30, 35, 1, false, 2, 150);
+        Weapon knife = new Weapon("Knife", 30, 40, 1, true, 3, 140);
+        Weapon staff = new Weapon("Staff", 25, 30, 2, false, 2, 140);
+
+
+        Armor[] armors = new Armor[] {
+                simplArmor,
+                simplArmor1,
+                simplArmor2,
+                simplArmor3
+        };
+
+
+        Weapon[] weapons = new Weapon[] {
+                simpleSword,
+                greatSword,
+                twoHandSword,
+                bow,
+                knife,
+                staff
+        };
+
+        serejka.setReservedWeapon(hand);
+        bulya.setReservedWeapon(hand);
+
+        serejka.selectWeapon(weapons);
+        bulya.selectWeapon(weapons);
+        serejka.selectArmor(armors);
+        bulya.selectArmor(armors);
 
         showIntro(bulya, serejka);
 
-        Random random = new Random(System.currentTimeMillis());
+
 
         while (serejka.getLife() > 0 && bulya.getLife() > 0) {
 
             int fightCase = random.nextInt(4);
-            int critSer = random.nextInt(5);
-            int critBul = random.nextInt(5);
+
 
             println("\n");
             switch (fightCase) {
@@ -49,52 +100,38 @@ public class Hello {
                     break;
                 }
                 case 1: {
-                    System.out.print("Serejka strike... ");
-                    sleep(1000);
-                    int commonDamage = serejkaSword.getPhysicalDamage();
-                    if (critSer == 1) {
-                        commonDamage += 40;
-                        println(ANSI_RED + "CRIT!!!" + ANSI_RESET);
-                    }
-                    bulya.hit(commonDamage);
-                    println("Damage " + commonDamage + ".");
+                    attackAndPrint(serejka, bulya);
                     break;
                 }
                 case 2: {
-                    System.out.print("Bulya strike... ");
-                    sleep(1000);
-                    int commonDamage = bulyaSword.getPhysicalDamage();
-                    if (critBul == 1) {
-                        commonDamage += 30;
-                        println(ANSI_RED + "CRIT!!!" + ANSI_RESET);
-                    }
-                    serejka.hit(commonDamage);
-                    System.out.println("Damage " + commonDamage + ".");
+                    attackAndPrint(bulya, serejka);
                     break;
                 }
                 case 3: {
-                    System.out.print("Both strike... ");
+                    System.out.println("Both strike... ");
                     sleep(1000);
-                    int commonDamageSer = serejkaSword.getPhysicalDamage();
-                    int commonDamageBul = bulyaSword.getPhysicalDamage();
-                    if (critBul == 1) {
-                        commonDamageBul += 30;
-                        System.out.print(ANSI_RED + "Bulya has CRIT!!! " + ANSI_RESET);
-
-                    }
-                    if (critSer ==1) {
-                        commonDamageSer += 40;
-                        System.out.print(ANSI_RED + "Serejka has CRIT!!!" + ANSI_RESET);
-                    }
-                    bulya.hit(commonDamageSer);
-                    serejka.hit(commonDamageBul);
-                    System.out.print("\nSerejka damage " + commonDamageSer);
-                    System.out.println(" Bulya damage " + commonDamageBul);
+                    attackAndPrint(serejka, bulya);
+                    attackAndPrint(bulya, serejka);
+//                    AttackResult serejkaAttackResult = serejka.attack(bulya);
+//                    sleep(1000);
+//                    /*if (attackResult.isWeaponIsBroken()) {
+//                        println("OMG!!!, the weapon is broken..., now " + serejka.getAnsiName() + " must fight by fist.");
+//                    }
+//                    if (serejkaAttackResult.isCrit()) {
+//                        println(ANSI_RED + "Serejka CRIT!!!" + ANSI_RESET);
+//                    }
+//                    println(ANSI_YELLOW + "Serejka " +ANSI_RESET + "deal damage " + serejkaAttackResult.getRealDamage() + "(" + serejkaAttackResult.getDamage()+ ").");
+//                    AttackResult attackResult = bulya.attack(serejka);
+//                    sleep(1000);
+//                    if (attackResult.isCrit()) {
+//                        println(ANSI_RED + "Bulya CRIT!!!" + ANSI_RESET);
+//                    }
+//                    println(ANSI_PURPLE + "Bulya " +ANSI_RESET + "deal damage " + attackResult.getRealDamage() + "(" +attackResult.getDamage()+ ")."); */
                     break;
                 }
             }
-            println(String.format("%s life is %s", bulya.getName(), bulya.getLife()));
-            println(String.format("%s life is %s", serejka.getName(), serejka.getLife()));
+            println(String.format("%s life is %s", bulya.getAnsiName(), bulya.getLife()));
+            println(String.format("%s life is %s", serejka.getAnsiName(), serejka.getLife()));
             sleep(2000);
         }
 
@@ -106,11 +143,16 @@ public class Hello {
             println(rewardName + " is crying!!!");
 
         } else if (bulya.getLife() <= 0) {
-            System.out.println("\nWe have a winner " + serejka.getName() + ".");
+            System.out.println("\nWe have a winner " + serejka.getAnsiName() + ".");
             println("Roses for the winner " + ANSI_RED + "இڿڰۣ-ڰۣ—" + ANSI_RESET + " and kiss from " + rewardName +".");
         } else {
-            System.out.println("\nWe have a winner " + bulya.getName() + ".");
+            System.out.println("\nWe have a winner " + bulya.getAnsiName() + ".");
             println("Roses for the winner " + ANSI_RED + "இڿڰۣ-ڰۣ—" + ANSI_RESET + " and kiss from " + rewardName +".");
+        }
+        if (random.nextInt(2) == 1) {
+
+            int cries = random.nextInt(REWARD_PHRASES.length);
+            println(ANSI_BLUE + REWARD_PHRASES[cries] + ANSI_RESET + " - says " + rewardName + ".");
         }
     }
     public static void sleep (long ms) {
@@ -124,8 +166,16 @@ public class Hello {
         System.out.println(txt);
     }
     public static void showIntro(Hero hero1, Hero hero2) {
-        println(String.format("%s life is %s", hero1.getName(), hero1.getLife()));
-        println(String.format("%s life is %s", hero2.getName(), hero2.getLife()));
+        println(String.format("%s life is %s", hero1.getAnsiName(), hero1.getLife()));
+        System.out.print(hero1.getAnsiName() + " choice... ");
+        sleep(1000);
+        println(hero1.getWeapon().getWeaponName() + " with damage " + hero1.getWeapon().getMinPhysicalDamage() + "-" + hero1.getWeapon().getMaxPhysicalDamage());
+        println(hero1.getArmor().getName() + " with " + hero1.getArmor().getDefence() + " defence.");
+        println(String.format("%s life is %s", hero2.getAnsiName(), hero2.getLife()));
+        System.out.print(hero2.getAnsiName() + " choice... ");
+        sleep(1000);
+        println(hero2.getWeapon().getWeaponName() + " with damage " + hero2.getWeapon().getMinPhysicalDamage() +"-" + hero2.getWeapon().getMaxPhysicalDamage());
+        println(hero2.getArmor().getName() + " with " + hero2.getArmor().getDefence() + " defence.");
         sleep(2000);
         println("\n3...");
         sleep(1000);
@@ -136,53 +186,26 @@ public class Hello {
         println(ANSI_RED +"\nFight!!!" + ANSI_RESET);
         sleep(1000);
     }
+    public static void attackAndPrint(Hero hero1, Hero hero2) {
+        System.out.print(hero1.getAnsiName() + " strike... ");
+        sleep(1000);
+        AttackResult attackResult = hero1.attack(hero2);
+        sleep(1000);
+        if (attackResult.isWeaponIsBroken()) {
+            println("OMG!!!, the weapon is broken..., now " + hero1.getAnsiName() + " must fight by fist.");
+        }
+        if (attackResult.isCrit()) {
+
+            if (random.nextInt(5) == 1) {
+
+                int cries = random.nextInt(Hero.PHRASE.length);
+
+                println(ANSI_RED + "CRIT!!! " + ANSI_RESET + ANSI_CYAN + Hero.PHRASE[cries] + ANSI_RESET);
+            } else {
+                println(ANSI_RED + "CRIT!!! " + ANSI_RESET);
+            }
+        }
+        println("Damage " + attackResult.getRealDamage() + "(" +attackResult.getDamage()+ ").");
+
+    }
 }
-
-
-      /*  String catTranslate = Cat.translate("Hello, kitty");
-
-        //System.out.println("Kitty says: " + catTranslate);
-
-        Cat cat = new Cat();
-        Car car = new Car();
-        car.setColor("yellow");
-        car.setModel("Tesla");
-        car.setEngine("electric");
-        car.setYear(2014);
-
-        Car vw = new Car();
-        vw.setModel("Golf");
-        vw.setEngine("diesel");
-        vw.setColor("white");
-        vw.setYear(2015);
-
-        System.out.println("I have a car, model " + car.getModel() + ", whit " + car.getEngine() + " engine, " + car.getColor() + " color, " + car.getYear() + " year.");
-        System.out.println("I have a car, model " + vw.getModel() + ", whit " + vw.getEngine() + " engine, " + vw.getColor() + " color, " + vw.getYear() + " year.");
-
-        vw.setColor("black");
-        System.out.println("I paint my " + vw.getModel() + " to " + vw.getColor() + " color.");
-
-
-        //Dota axe = new AttributDota(30, 20, 10, "Strength");
-        AttributDota axe = new AttributDota(30, 20, 10, "Strength");
-
-        axe.setName("Axe");
-        axe.setFaction("Dire");
-        System.out.println(axe.strength);
-        System.out.println(axe.attribut);
-
-
-
-        Human human = new Human();
-
-        human.setAge(27);
-        human.setName("Serega");
-
-       // System.out.println("The human sex is " + human.getName());
-
-
-     *    ConfigurableApplicationContext context = SpringApplication.run(WebApp.class, args);
-     *     Run Spring
-     *     ConfigurableApplicationContext context = SpringApplication.run(WebApplication.class, args);
-     *     System.exit(0);
-     */
