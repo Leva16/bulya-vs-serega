@@ -1,6 +1,11 @@
 package com.test;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.nio.file.Watchable;
+import java.security.spec.MGF1ParameterSpec;
 import java.util.Random;
+
 import com.test.animals.Cat;
 import com.test.web.AttackResult;
 import com.test.web.WebApp;
@@ -24,7 +29,7 @@ public class Hello {
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_WHITE = "\u001B[37m";
 
-    public static final String[] REWARD_PHRASES = new String[] {
+    public static final String[] REWARD_PHRASES = new String[]{
             "You are my Hero!!!",
             "I know it would be you.",
             "You are my brave boy!",
@@ -35,12 +40,14 @@ public class Hello {
             "I knew you're the best!"
     };
 
+
     static Random random = new Random(System.currentTimeMillis());
 
     public static void main(String[] args) throws IOException {
 
-        Hero serejka = new Hero("Serejka", 1300, 400);
-        Hero bulya = new Hero("Bulya", 1500, 600);
+
+        Hero serejka = new Hero("Serejka", 300, 400);
+        Hero bulya = new Hero("Bulya", 500, 600);
         serejka.setAnsiColor(ANSI_YELLOW);
         bulya.setAnsiColor(ANSI_PURPLE);
 
@@ -51,15 +58,29 @@ public class Hello {
         Armor simplArmor3 = new Armor("Setocka Leontieva", 1);
 
         Weapon hand = new Weapon("Hand", 5, 10, 1, false, 2, Integer.MAX_VALUE);
-        Weapon simpleSword = new Weapon("Simple Sword", 40, 50, 1.8, true, 4, 150);
-        Weapon greatSword = new Weapon("Great Sword", 80, 90, 1.4, true, 3, 170);
-        Weapon twoHandSword = new Weapon("Two Hand Sword", 90, 110, 2.1, false, Integer.MAX_VALUE, 110);
-        Weapon bow = new Weapon("Bow", 30, 35, 1, false, 2, 150);
-        Weapon knife = new Weapon("Knife", 30, 40, 1, true, 3, 140);
-        Weapon staff = new Weapon("Staff", 25, 30, 2, false, 2, 140);
+        Weapon simpleSword = new Weapon("Simple Sword", 40, 50, 1.8, true, 4, 2);
+        Weapon greatSword = new Weapon("Great Sword", 80, 90, 1.4, true, 3, 2);
+        Weapon twoHandSword = new Weapon("Two Hand Sword", 90, 110, 2.1, false, Integer.MAX_VALUE, 2);
+        Weapon bow = new Weapon("Bow", 30, 35, 1, false, 2, 2);
+        Weapon knife = new Weapon("Knife", 30, 40, 1, true, 3, 2);
+        Weapon staff = new Weapon("Staff", 25, 30, 2, false, 2, 2);
+
+        Magic ligthStrike = new Magic(ANSI_CYAN + "Slept by ass" + ANSI_RESET, 40, 100 );
+        Magic fireStrike = new Magic(ANSI_CYAN + "Twist nipples" + ANSI_RESET, 42, 110);
+        Magic gunShot = new Magic(ANSI_CYAN + "Powder in the eyes" + ANSI_RESET, 50, 120);
+        Magic dragonBlaze = new Magic(ANSI_CYAN + "Stretch underwave to the head" + ANSI_RESET, 60, 150);
+        Magic lavaRage = new Magic(ANSI_CYAN + "Slap in the Face" + ANSI_RESET, 68, 170);
+
+        Magic[] magics = new Magic[] {
+                ligthStrike,
+                fireStrike,
+                gunShot,
+                dragonBlaze,
+                lavaRage
+        };
 
 
-        Armor[] armors = new Armor[] {
+        Armor[] armors = new Armor[]{
                 simplArmor,
                 simplArmor1,
                 simplArmor2,
@@ -67,7 +88,7 @@ public class Hello {
         };
 
 
-        Weapon[] weapons = new Weapon[] {
+        Weapon[] weapons = new Weapon[]{
                 simpleSword,
                 greatSword,
                 twoHandSword,
@@ -84,14 +105,23 @@ public class Hello {
         serejka.selectArmor(armors);
         bulya.selectArmor(armors);
 
+        println("weapon " + serejka.getWeapon());
+
+
+
         showIntro(bulya, serejka);
 
+        //int mercy = random.nextInt(2);
 
+        int mercy = 1;
+        boolean isGo = false;
 
+        int count = 0;
         while (serejka.getLife() > 0 && bulya.getLife() > 0) {
-
+            count += 1;
             int fightCase = random.nextInt(4);
-
+            serejka.selectMagic(magics);
+            bulya.selectMagic(magics);
 
             println("\n");
             switch (fightCase) {
@@ -133,38 +163,107 @@ public class Hello {
             println(String.format("%s life is %s", bulya.getAnsiName(), bulya.getLife()));
             println(String.format("%s life is %s", serejka.getAnsiName(), serejka.getLife()));
             sleep(2000);
-        }
+
+            if (count == 5) {
+                println("\n");
+                println("\n");
+                int i = random.nextInt(2);
+                String rewardName = (i == 1) ? "Leva" : "Aleksitto";
+                sleep(2000);
+                println(ANSI_GREEN + rewardName + ANSI_RESET + " runs to the warriors and scream: Boys, stops, you kill each others!");
+                println("No, say boys, we fight for you till someone is die.");
+            }
+
+                if (bulya.getLife() <= 200 && !isGo) {
+                    print(String.format("%s life is %s, would you like to mercy him (finger up) or finish him (finger down) or go till the end (go): ", bulya.getAnsiName(), bulya.getLife()));
+                    BufferedReader text = new BufferedReader(new InputStreamReader(System.in));
+                    String txt = text.readLine().toLowerCase();
+                    println(txt);
+
+                    while (!"up".equals(txt) && !"down".equals(txt) && !"go".equals(txt)) {
+                        print("You should write 'Up' or 'Down' or 'Go' word: ");
+                        txt = text.readLine().toLowerCase();
+                        println(txt);
+                    }
+
+                    if ("up".equals(txt)) {
+                        print(bulya.getAnsiName() + " thanks you.");
+                        break;
+                    } else if ("down".equals(txt)) {
+                        println(serejka.getAnsiName() + " get final strike whit e" + bulya.getLife() + " damage");
+                        bulya.setLife(0);
+                    } else {
+                        isGo = true;
+                        continue;
+                    }
+                } else if (serejka.getLife() < 200 && !isGo) {
+                    print(String.format("%s life is %s, would you like to mercy him (finger up) or finish him (finger down): ", serejka.getAnsiName(), serejka.getLife()));
+                    BufferedReader text = new BufferedReader(new InputStreamReader(System.in));
+                    String txt = text.readLine().toLowerCase();
+
+                    while (!"up".equals(txt) && !"down".equals(txt) && !"go".equals(txt)) {
+                        print("You should write 'Up' or 'Down' or 'Go' word: ");
+                        txt = text.readLine().toLowerCase();
+                        println(txt);
+                    }
+                    if ("up".equals(txt)) {
+                        println(serejka.getAnsiName() + " thanks you.");
+                        break;
+                    } else if ("down".equals(txt)) {
+                        println(bulya.getAnsiName() + " get final strike whit " + serejka.getLife() + " damage.");
+                        serejka.setLife(0);
+                    } else {
+                        isGo = true;
+                        continue;
+                    }
+
+                }
+
+            }
+
 
         int i = random.nextInt(2);
 
         String rewardName = (i == 1) ? "Leva" : "Aleksitto";
-        println("i = " + i);
+
+
+
+        //println("i = " + i);
         if (bulya.getLife() <= 0 && serejka.getLife() <= 0) {
             println(rewardName + " is crying!!!");
+            return;
 
         } else if (bulya.getLife() <= 0) {
             System.out.println("\nWe have a winner " + serejka.getAnsiName() + ".");
-            println("Roses for the winner " + ANSI_RED + "இڿڰۣ-ڰۣ—" + ANSI_RESET + " and kiss from " + rewardName +".");
+            println("Roses for the winner " + ANSI_RED + "இڿڰۣ-ڰۣ—" + ANSI_RESET + " and kiss from " + rewardName + ".");
         } else {
             System.out.println("\nWe have a winner " + bulya.getAnsiName() + ".");
-            println("Roses for the winner " + ANSI_RED + "இڿڰۣ-ڰۣ—" + ANSI_RESET + " and kiss from " + rewardName +".");
+            println("Roses for the winner " + ANSI_RED + "இڿڰۣ-ڰۣ—" + ANSI_RESET + " and kiss from " + rewardName + ".");
         }
         if (random.nextInt(2) == 1) {
 
             int cries = random.nextInt(REWARD_PHRASES.length);
             println(ANSI_BLUE + REWARD_PHRASES[cries] + ANSI_RESET + " - says " + rewardName + ".");
         }
+        // return mercy;
     }
-    public static void sleep (long ms) {
+
+    public static void sleep(long ms) {
         try {
             Thread.sleep(ms);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
+
     public static void println(String txt) {
         System.out.println(txt);
     }
+
+    public static void print(String txt) {
+        System.out.print(txt);
+    }
+
     public static void showIntro(Hero hero1, Hero hero2) {
         println(String.format("%s life is %s", hero1.getAnsiName(), hero1.getLife()));
         System.out.print(hero1.getAnsiName() + " choice... ");
@@ -174,7 +273,7 @@ public class Hello {
         println(String.format("%s life is %s", hero2.getAnsiName(), hero2.getLife()));
         System.out.print(hero2.getAnsiName() + " choice... ");
         sleep(1000);
-        println(hero2.getWeapon().getWeaponName() + " with damage " + hero2.getWeapon().getMinPhysicalDamage() +"-" + hero2.getWeapon().getMaxPhysicalDamage());
+        println(hero2.getWeapon().getWeaponName() + " with damage " + hero2.getWeapon().getMinPhysicalDamage() + "-" + hero2.getWeapon().getMaxPhysicalDamage());
         println(hero2.getArmor().getName() + " with " + hero2.getArmor().getDefence() + " defence.");
         sleep(2000);
         println("\n3...");
@@ -183,9 +282,10 @@ public class Hello {
         sleep(1000);
         println("1...");
         sleep(1000);
-        println(ANSI_RED +"\nFight!!!" + ANSI_RESET);
+        println(ANSI_RED + "\nFight!!!" + ANSI_RESET);
         sleep(1000);
     }
+
     public static void attackAndPrint(Hero hero1, Hero hero2) {
         System.out.print(hero1.getAnsiName() + " strike... ");
         sleep(1000);
@@ -193,6 +293,8 @@ public class Hello {
         sleep(1000);
         if (attackResult.isWeaponIsBroken()) {
             println("OMG!!!, the weapon is broken..., now " + hero1.getAnsiName() + " must fight by fist.");
+            println(hero2.getAnsiName() + " throw his " + hero2.getWeapon() + " away. ");
+            println(ANSI_RED + "Fist FIGHT!!!");
         }
         if (attackResult.isCrit()) {
 
@@ -205,7 +307,10 @@ public class Hello {
                 println(ANSI_RED + "CRIT!!! " + ANSI_RESET);
             }
         }
-        println("Damage " + attackResult.getRealDamage() + "(" +attackResult.getDamage()+ ").");
+        if (attackResult.isMagicDamage()) {
+            println("WOW... " + hero1.getAnsiName() + " has magic spell " + hero1.getMagic().getName() + " he deal " + hero2.getAnsiName() + " extra "+ hero1.getMagic().getDamage() + " damage.");
+        }
+        println("Damage " + attackResult.getRealDamage() + "(" + attackResult.getDamage() + ").");
 
     }
 }

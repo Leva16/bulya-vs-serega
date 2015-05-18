@@ -6,6 +6,7 @@ package com.test.web;
 public class AttackResult {
 
     private int damage;
+    private boolean magicDamage;
     private boolean crit;
     private int realDamage;
     private boolean weaponIsBroken;
@@ -16,6 +17,14 @@ public class AttackResult {
 
     public void setWeaponIsBroken(boolean weaponIsBroken) {
         this.weaponIsBroken = weaponIsBroken;
+    }
+
+    public boolean isMagicDamage() {
+        return magicDamage;
+    }
+
+    public void setMagicDamage(boolean magicDamage) {
+        this.magicDamage = magicDamage;
     }
 
     public int getRealDamage() {

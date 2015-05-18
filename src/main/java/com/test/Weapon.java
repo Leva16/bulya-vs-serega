@@ -88,4 +88,9 @@ public class Weapon {
     public void setOneHand(boolean oneHand) {
         this.oneHand = oneHand;
     }
+
+    @Override
+    public String toString() {
+        return getWeaponName();
+    }
 }

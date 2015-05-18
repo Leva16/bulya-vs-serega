@@ -21,12 +21,10 @@ public class Hero {
             "For Justice!",
             "Is that really all you've got?",
             "I'll show you hell!",
+            "Today i will celebrate my victory!",
             "For my love!",
             "Game is over!",
-            "Today we will celebrate my victory!",
-            "For my love!",
-            "Game is over!",
-            "Today we will celebrate my victory!",
+            "Today i will celebrate my victory!",
             "Bitch, you don't have a future!",
             "Come and get some!",
             "In your face!",
@@ -69,7 +67,21 @@ public class Hero {
     private  Weapon reservedWeapon;
     private  Weapon weapon;
 
+    public Magic getMagic() {
+        return magic;
+    }
+
+    public void setMagic(Magic magic) {
+        this.magic = magic;
+    }
+
+    private Magic magic;
+
     private static Random random = new Random(System.currentTimeMillis());
+
+    public void setWeapon(Weapon weapon) {
+        this.weapon = weapon;
+    }
 
     public Weapon getWeapon() {
         return weapon;
@@ -116,6 +128,11 @@ public class Hero {
         return realDamage;
     }
 
+    public Magic selectMagic(Magic[] magics) {
+        int choice = random.nextInt(magics.length);
+        this.magic = magics[choice];
+        return this.magic;
+    }
 
     public Weapon selectWeapon(Weapon[] weapons) {
         int choice = random.nextInt(weapons.length);
@@ -140,7 +157,9 @@ public class Hero {
         if (brakeChance == 1) {
             this.weapon = this.reservedWeapon;
             heroAttackResult.setWeaponIsBroken(true);
+            hero.setWeapon(hero.reservedWeapon);
         }
+
 
         // get damage value of the used weapon hero who attack
         int damage = random.nextInt(1 + this.getWeapon().getMaxPhysicalDamage() - this.getWeapon().getMinPhysicalDamage()) + this.getWeapon().getMinPhysicalDamage();
@@ -156,6 +175,14 @@ public class Hero {
             //set info about crit to the hero attack result instance
             heroAttackResult.setCrit(true);
         }
+
+        //magic damage chanse
+        int magicChance = random.nextInt(2);
+        if (magicChance == 1) {
+            damage += this.getMagic().getDamage();
+            heroAttackResult.setMagicDamage(true);
+        }
+
         // reduce life for the attacked hero
         int realDamage = hero.hit(damage);
         //set info about damage to the AttackResult instance
@@ -164,5 +191,4 @@ public class Hero {
         //return our heroAttackResult variable
         return heroAttackResult;
     }
-
 }
